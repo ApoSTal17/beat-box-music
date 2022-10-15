@@ -12,8 +12,7 @@ public class Music {
             BPM_DELTA = 10;
     public static final int
             BPM_DOWN = 0,
-            BPM_UP = 1,
-            BPM_GET = -1;
+            BPM_UP = 1;
     private ArrayList<MidiEvent> midiEventsList = new ArrayList<>();
     private int tickCounter = 0;
     private int currentInstrument = 0;
@@ -85,7 +84,7 @@ public class Music {
 
     private MidiEvent createMidiEvent(int command,
                               int channel, int data,
-                              int volume, int tick) throws InvalidMidiDataException{
+                              int volume, int tick) throws InvalidMidiDataException {
          ShortMessage a = new ShortMessage();
          a.setMessage(command, channel, data, volume);
          return new MidiEvent(a, tick);
