@@ -5,6 +5,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class MainWindow extends JFrame {
 
@@ -28,7 +32,9 @@ public class MainWindow extends JFrame {
 
         JPanel background = new JPanel(new BorderLayout());
         background.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
         //  buttons
+
         Box buttonBox = new Box(BoxLayout.Y_AXIS);
         ButtonsListener buttonsListener = new ButtonsListener();
         for (String but : buttons) {
@@ -40,7 +46,9 @@ public class MainWindow extends JFrame {
         }
         bpmLabel = new JLabel("BPM: " + music.changeBPM(-1));
         buttonBox.add(bpmLabel);
+
         //  buttons other
+
         JPanel loopPanel = new JPanel(new FlowLayout());
         loopPanel.add(new JLabel("Loops: "));
         loopTextFld = new JTextField("0");
@@ -51,7 +59,23 @@ public class MainWindow extends JFrame {
         loopButton.addActionListener(buttonsListener);
         buttonBox.add(loopButton);
         buttonBox.add(loopPanel);
+
+        //  serializable buttons
+
+        JButton serialItButton = new JButton("Serial It!");
+        JButton restoreItButton = new JButton("Restore It!");
+
+        SerializableListener serButtonListener = new SerializableListener();
+        serialItButton.addActionListener(serButtonListener);
+        restoreItButton.addActionListener(serButtonListener);
+
+        serialItButton.setPreferredSize(new Dimension(130, 20));
+        restoreItButton.setPreferredSize(new Dimension(130, 20));
+        buttonBox.add(serialItButton);
+        buttonBox.add(Box.createRigidArea(new Dimension(0, 5)));
+        buttonBox.add(restoreItButton);
         //  instruments
+
         Box nameBox = new Box(BoxLayout.Y_AXIS);
         for (String instr : instrumentsStr)
             nameBox.add(new Label(instr));
@@ -59,7 +83,9 @@ public class MainWindow extends JFrame {
         background.add(BorderLayout.EAST, buttonBox);
         background.add(BorderLayout.WEST, nameBox);
         getContentPane().add(background);
+
         //  check boxes
+
         GridLayout grid = new GridLayout(16, 16);
         grid.setVgap(1);
         grid.setHgap(2);
@@ -126,6 +152,47 @@ public class MainWindow extends JFrame {
                         musicPreview.createNode(note, instruments[i]);
                         musicPreview.play();
                         musicPreview.resetTrack();
+                    }
+                }
+            }
+        }
+    }
+
+    private class SerializableListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JButton but = (JButton) e.getSource();
+            switch (but.getText()) {
+                case "Serial It!" -> {
+                    boolean[][] backupCheckBoxes = new boolean[checkBoxes.length][checkBoxes[0].length];
+                    for (int i = 0; i < backupCheckBoxes.length; i++) {
+                        for (int j = 0; j < backupCheckBoxes[0].length; j++) {
+                            backupCheckBoxes[i][j] = checkBoxes[i][j].isSelected();
+                        }
+                    }
+                    try {
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+                                new FileOutputStream("checkBoxArray.ser"));
+                        objectOutputStream.writeObject(backupCheckBoxes);
+                        objectOutputStream.close();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                case "Restore It!" -> {
+                    try {
+                        ObjectInputStream objectInputStream = new ObjectInputStream(
+                                new FileInputStream("checkBoxArray.ser"));
+                        boolean[][] backupCheckBoxes = (boolean[][]) objectInputStream.readObject();
+                        objectInputStream.close();
+
+                        for (int i = 0; i < backupCheckBoxes.length; i++) {
+                            for (int j = 0; j < backupCheckBoxes[0].length; j++) {
+                                checkBoxes[i][j].setSelected(backupCheckBoxes[i][j]);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
