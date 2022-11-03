@@ -5,10 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 public class MainWindow extends JFrame {
 
@@ -32,6 +29,7 @@ public class MainWindow extends JFrame {
 
         JPanel background = new JPanel(new BorderLayout());
         background.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
 
         //  buttons
 
@@ -60,20 +58,6 @@ public class MainWindow extends JFrame {
         buttonBox.add(loopButton);
         buttonBox.add(loopPanel);
 
-        //  serializable buttons
-
-        JButton serialItButton = new JButton("Serial It!");
-        JButton restoreItButton = new JButton("Restore It!");
-
-        SerializableListener serButtonListener = new SerializableListener();
-        serialItButton.addActionListener(serButtonListener);
-        restoreItButton.addActionListener(serButtonListener);
-
-        serialItButton.setPreferredSize(new Dimension(130, 20));
-        restoreItButton.setPreferredSize(new Dimension(130, 20));
-        buttonBox.add(serialItButton);
-        buttonBox.add(Box.createRigidArea(new Dimension(0, 5)));
-        buttonBox.add(restoreItButton);
         //  instruments
 
         Box nameBox = new Box(BoxLayout.Y_AXIS);
@@ -99,6 +83,63 @@ public class MainWindow extends JFrame {
                 checkBoxPanel.add(checkBoxes[i][j]);
             }
         }
+
+        //  menu
+
+        JMenuBar jMenuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem openMenuItem = new JMenuItem("Open");
+        JMenuItem saveMenuItem = new JMenuItem("Save");
+        JMenuItem resetMenuItem = new JMenuItem("Reset");
+        JMenuItem quitMenuItem = new JMenuItem("Quit");
+
+        fileMenu.add(openMenuItem);
+        fileMenu.add(saveMenuItem);
+        fileMenu.add(resetMenuItem);
+        fileMenu.add(quitMenuItem);
+        jMenuBar.add(fileMenu);
+        setJMenuBar(jMenuBar);
+
+        JFileChooser jFileChooser = new JFileChooser("D:/JavaProjects/jaba3kurs/BeatBoxMusic");
+
+        openMenuItem.addActionListener(e -> {
+            jFileChooser.showOpenDialog(this);
+            File file = jFileChooser.getSelectedFile();
+            try {
+                music.stop();
+                restoreConfig(file);
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.toString(),
+                        "Ошибка открытия файла", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        saveMenuItem.addActionListener(e -> {
+            jFileChooser.showSaveDialog(this);
+            File file = jFileChooser.getSelectedFile();
+            try {
+                music.stop();
+                serializeConfig(file);
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.toString(),
+                        "Ошибка сохранения файла", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        resetMenuItem.addActionListener(e -> {
+            for (int i = 0; i < checkBoxes.length; i++) {
+                for (int j = 0; j < checkBoxes[0].length; j++) {
+                    checkBoxes[i][j].setSelected(false);
+                }
+            }
+            bpmLabel.setText("BPM: " + 150.0f);
+            music.setCurrentBPM(150.0f);
+            loopTextFld.setText("0");
+            music.setLoopCount(0);
+            music.stop();
+        });
+        quitMenuItem.addActionListener(e ->
+                System.exit(0));
 
         setTitle("Beat Box Music!");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -158,51 +199,38 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private class SerializableListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JButton but = (JButton) e.getSource();
-            switch (but.getText()) {
-                case "Serial It!" -> {
-                    boolean[][] backupCheckBoxes = new boolean[checkBoxes.length][checkBoxes[0].length];
-                    for (int i = 0; i < backupCheckBoxes.length; i++) {
-                        for (int j = 0; j < backupCheckBoxes[0].length; j++) {
-                            backupCheckBoxes[i][j] = checkBoxes[i][j].isSelected();
-                        }
-                    }
-                    try {
-                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-                                new FileOutputStream("checkBoxArray.ser"));
-                        objectOutputStream.writeObject(backupCheckBoxes);
-                        objectOutputStream.writeFloat(music.getCurrentBPM());
-                        objectOutputStream.writeInt(music.getLoop());
-                        objectOutputStream.close();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                case "Restore It!" -> {
-                    try {
-                        ObjectInputStream objectInputStream = new ObjectInputStream(
-                                new FileInputStream("checkBoxArray.ser"));
-                        boolean[][] backupCheckBoxes = (boolean[][]) objectInputStream.readObject();
-                        float bpm = objectInputStream.readFloat();
-                        int loops = objectInputStream.readInt();
-                        objectInputStream.close();
+    private void serializeConfig(File file) throws Exception {
 
-                        music.setCurrentBPM(bpm);
-                        bpmLabel.setText("BPM: " + bpm);
-                        music.setLoopCount(loops);
-                        loopTextFld.setText(loops + "");
-                        for (int i = 0; i < backupCheckBoxes.length; i++) {
-                            for (int j = 0; j < backupCheckBoxes[0].length; j++) {
-                                checkBoxes[i][j].setSelected(backupCheckBoxes[i][j]);
-                            }
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
+        boolean[][] backupCheckBoxes = new boolean[checkBoxes.length][checkBoxes[0].length];
+        for (int i = 0; i < backupCheckBoxes.length; i++) {
+            for (int j = 0; j < backupCheckBoxes[0].length; j++) {
+                backupCheckBoxes[i][j] = checkBoxes[i][j].isSelected();
+            }
+        }
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+                new FileOutputStream(file));
+        objectOutputStream.writeObject(backupCheckBoxes);
+        objectOutputStream.writeFloat(music.getCurrentBPM());
+        objectOutputStream.writeInt(music.getLoop());
+        objectOutputStream.close();
+    }
+
+    private void restoreConfig(File file) throws Exception {
+
+        ObjectInputStream objectInputStream = new ObjectInputStream(
+                new FileInputStream(file));
+        boolean[][] backupCheckBoxes = (boolean[][]) objectInputStream.readObject();
+        float bpm = objectInputStream.readFloat();
+        int loops = objectInputStream.readInt();
+        objectInputStream.close();
+
+        music.setCurrentBPM(bpm);
+        bpmLabel.setText("BPM: " + bpm);
+        music.setLoopCount(loops);
+        loopTextFld.setText(loops + "");
+        for (int i = 0; i < backupCheckBoxes.length; i++) {
+            for (int j = 0; j < backupCheckBoxes[0].length; j++) {
+                checkBoxes[i][j].setSelected(backupCheckBoxes[i][j]);
             }
         }
     }
