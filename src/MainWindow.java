@@ -174,6 +174,8 @@ public class MainWindow extends JFrame {
                         ObjectOutputStream objectOutputStream = new ObjectOutputStream(
                                 new FileOutputStream("checkBoxArray.ser"));
                         objectOutputStream.writeObject(backupCheckBoxes);
+                        objectOutputStream.writeFloat(music.getCurrentBPM());
+                        objectOutputStream.writeInt(music.getLoop());
                         objectOutputStream.close();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -184,8 +186,14 @@ public class MainWindow extends JFrame {
                         ObjectInputStream objectInputStream = new ObjectInputStream(
                                 new FileInputStream("checkBoxArray.ser"));
                         boolean[][] backupCheckBoxes = (boolean[][]) objectInputStream.readObject();
+                        float bpm = objectInputStream.readFloat();
+                        int loops = objectInputStream.readInt();
                         objectInputStream.close();
 
+                        music.setCurrentBPM(bpm);
+                        bpmLabel.setText("BPM: " + bpm);
+                        music.setLoopCount(loops);
+                        loopTextFld.setText(loops + "");
                         for (int i = 0; i < backupCheckBoxes.length; i++) {
                             for (int j = 0; j < backupCheckBoxes[0].length; j++) {
                                 checkBoxes[i][j].setSelected(backupCheckBoxes[i][j]);

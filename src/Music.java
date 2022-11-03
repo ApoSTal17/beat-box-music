@@ -13,7 +13,7 @@ public class Music {
     public static final int
             BPM_DOWN = 0,
             BPM_UP = 1;
-    private ArrayList<MidiEvent> midiEventsList = new ArrayList<>();
+    private final ArrayList<MidiEvent> midiEventsList = new ArrayList<>();
     private int tickCounter = 0;
     private int currentInstrument = 0;
     private float currentBPM = 150;
@@ -43,6 +43,18 @@ public class Music {
         if (sequencer != null)
             sequencer.setTempoInBPM(currentBPM);
         return currentBPM;
+    }
+
+    public float getCurrentBPM() {
+        return currentBPM;
+    }
+
+    public void setCurrentBPM(float currentBPM) {
+        this.currentBPM = currentBPM;
+    }
+
+    public int getLoop() {
+        return loop;
     }
 
     public void setLoopCount(int loop) {
