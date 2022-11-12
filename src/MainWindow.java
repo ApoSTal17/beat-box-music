@@ -1,10 +1,9 @@
 
+import com.sun.tools.javac.Main;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.io.*;
 
 public class MainWindow extends JFrame {
@@ -22,6 +21,10 @@ public class MainWindow extends JFrame {
     private final Music music = new Music();
     private final Music musicPreview;
     private final JTextField loopTextFld;
+    private MusicClient musicClient;
+    private final JTextArea chatTextArea;
+    private final JTextField nameMusicTextField;
+    private String userName = "";
 
     public MainWindow() {
 
@@ -57,6 +60,38 @@ public class MainWindow extends JFrame {
         loopButton.addActionListener(buttonsListener);
         buttonBox.add(loopButton);
         buttonBox.add(loopPanel);
+
+        //  network elements
+
+        nameMusicTextField = new JTextField("I'm name!");
+        nameMusicTextField.setPreferredSize(new Dimension(200, 23));
+        JPanel textFieldPanel = new JPanel();
+
+        JButton sendButton = new JButton("Send");
+        sendButton.setPreferredSize(new Dimension(130, 20));
+        sendButton.addActionListener(e -> sendMessageToServer());
+        nameMusicTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    sendMessageToServer();
+                }
+            }
+        });
+
+        chatTextArea = new JTextArea();
+        JScrollPane chatScroller = new JScrollPane(chatTextArea);
+        chatTextArea.setLineWrap(true);
+        chatScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        chatScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        chatScroller.setPreferredSize(new Dimension(200, 150));
+        JPanel chatPanel = new JPanel();
+
+        textFieldPanel.add(nameMusicTextField);
+        buttonBox.add(textFieldPanel);
+        buttonBox.add(sendButton);
+        chatPanel.add(chatScroller);
+        buttonBox.add(chatPanel);
 
         //  instruments
 
@@ -141,10 +176,41 @@ public class MainWindow extends JFrame {
         quitMenuItem.addActionListener(e ->
                 System.exit(0));
 
+        //  network menu
+
+        JMenu userMenu = new JMenu("User");
+        JMenuItem setUserNameMenuItem = new JMenuItem("Set user name");
+        JMenuItem connectionMenuItem = new JMenuItem("Connect to server");
+        JMenuItem disconnectMenuItem = new JMenuItem("Disconnect");
+
+        userMenu.add(setUserNameMenuItem);
+        userMenu.add(connectionMenuItem);
+        userMenu.add(disconnectMenuItem);
+        jMenuBar.add(userMenu);
+
+        setUserNameMenuItem.addActionListener(e -> new UserNameFrame(userName));
+
+        connectionMenuItem.addActionListener(e -> {
+            try {
+                musicClient = new MusicClient(this);
+                setUserNameMenuItem.setEnabled(false);
+            } catch (Exception ex) {
+                showErrorMessage("Connection error!", ex.getMessage());
+            }
+        });
+        /*disconnectMenuItem.addActionListener(e -> {
+            try {
+                musicClient.disconnect();
+                musicClient = null;
+            } catch (Exception ex) {
+                showErrorMessage("Disconnection error!", ex.getMessage());
+            }
+        });*/
+
         setTitle("Beat Box Music!");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocation(400, 50);
-        setSize(700, 450);
+        setSize(770, 470);
         setVisible(true);
     }
 
@@ -199,14 +265,19 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void serializeConfig(File file) throws Exception {
-
+    private boolean[][] serializeCheckBoxes() {
         boolean[][] backupCheckBoxes = new boolean[checkBoxes.length][checkBoxes[0].length];
         for (int i = 0; i < backupCheckBoxes.length; i++) {
             for (int j = 0; j < backupCheckBoxes[0].length; j++) {
                 backupCheckBoxes[i][j] = checkBoxes[i][j].isSelected();
             }
         }
+        return backupCheckBoxes;
+    }
+
+    private void serializeConfig(File file) throws Exception {
+
+        boolean[][] backupCheckBoxes = serializeCheckBoxes();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(
                 new FileOutputStream(file));
         objectOutputStream.writeObject(backupCheckBoxes);
@@ -233,6 +304,60 @@ public class MainWindow extends JFrame {
                 checkBoxes[i][j].setSelected(backupCheckBoxes[i][j]);
             }
         }
+    }
+
+    protected class UserNameFrame extends JFrame {
+
+        private JPanel panel1;
+        private JTextField textField1;
+        private JButton OKButton;
+
+        protected UserNameFrame(String name) {
+
+            JPanel background = new JPanel(new BorderLayout());
+            background.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+            background.add(panel1);
+            getContentPane().add(background);
+
+            textField1.setText(name);
+
+            setTitle("User Name");
+            setDefaultCloseOperation(HIDE_ON_CLOSE);
+            setLocation(500, 150);
+            setSize(350, 200);
+            setVisible(true);
+
+            OKButton.addActionListener(e -> {
+                MainWindow.this.userName = textField1.getText();
+                MainWindow.this.setTitle("Beat Box Music! - " + userName);
+                setVisible(false);
+            });
+        }
+    }
+
+    private void sendMessageToServer() {
+        if (musicClient != null) {
+            try {
+                musicClient.sendMessage(nameMusicTextField.getText());
+                nameMusicTextField.setText("");
+                nameMusicTextField.requestFocus();
+            } catch (Exception ex) {
+                showErrorMessage("Send message error!", ex.getMessage());
+            }
+        }
+    }
+
+    protected void showErrorMessage(String title, String errorText) {
+        JOptionPane.showMessageDialog(this, errorText,
+                title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    protected void setChatTextArea(String message) {
+        chatTextArea.append(message + "\n");
+    }
+
+    protected String getUserName() {
+        return userName;
     }
 
     public static void main(String[] args) {
