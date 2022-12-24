@@ -1,6 +1,3 @@
-
-import com.sun.tools.javac.Main;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -69,7 +66,10 @@ public class MainWindow extends JFrame {
 
         JButton sendButton = new JButton("Send");
         sendButton.setPreferredSize(new Dimension(130, 20));
-        sendButton.addActionListener(e -> sendMessageToServer());
+
+        sendButton.addActionListener(e -> {
+            sendMessageToServer();
+        });
         nameMusicTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -80,6 +80,11 @@ public class MainWindow extends JFrame {
         });
 
         chatTextArea = new JTextArea();
+        chatTextArea.setEditable(false);
+        /*chatTextArea.addCaretListener(e -> {
+            e.getDot()
+        });*/
+        chatTextArea.getPopupLocation()
         JScrollPane chatScroller = new JScrollPane(chatTextArea);
         chatTextArea.setLineWrap(true);
         chatScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -154,7 +159,7 @@ public class MainWindow extends JFrame {
             File file = jFileChooser.getSelectedFile();
             try {
                 music.stop();
-                serializeConfig(file);
+                serializeCheckBoxesConfig(file);
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.toString(),
@@ -265,7 +270,7 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private boolean[][] serializeCheckBoxes() {
+    private boolean[][] formCheckBoxesArray() {
         boolean[][] backupCheckBoxes = new boolean[checkBoxes.length][checkBoxes[0].length];
         for (int i = 0; i < backupCheckBoxes.length; i++) {
             for (int j = 0; j < backupCheckBoxes[0].length; j++) {
@@ -275,9 +280,9 @@ public class MainWindow extends JFrame {
         return backupCheckBoxes;
     }
 
-    private void serializeConfig(File file) throws Exception {
+    private void serializeCheckBoxesConfig(File file) throws Exception {
 
-        boolean[][] backupCheckBoxes = serializeCheckBoxes();
+        boolean[][] backupCheckBoxes = formCheckBoxesArray();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(
                 new FileOutputStream(file));
         objectOutputStream.writeObject(backupCheckBoxes);
@@ -303,6 +308,28 @@ public class MainWindow extends JFrame {
             for (int j = 0; j < backupCheckBoxes[0].length; j++) {
                 checkBoxes[i][j].setSelected(backupCheckBoxes[i][j]);
             }
+        }
+    }
+
+    private class CheckBoxesConfig implements Serializable {
+        private final boolean[][] checkBoxesArray;
+        private final float bpm;
+        private final int loops;
+        protected CheckBoxesConfig(boolean[][] checkBoxesArray, float bpm, int loops) {
+            this.checkBoxesArray = checkBoxesArray;
+            this.bpm = bpm;
+            this.loops = loops;
+        }
+        protected boolean[][] getCheckBoxesArray() {
+            return checkBoxesArray;
+        }
+
+        public float getBpm() {
+            return bpm;
+        }
+
+        public int getLoops() {
+            return loops;
         }
     }
 
@@ -338,7 +365,8 @@ public class MainWindow extends JFrame {
     private void sendMessageToServer() {
         if (musicClient != null) {
             try {
-                musicClient.sendMessage(nameMusicTextField.getText());
+                boolean[][] backupCheckBoxes = formCheckBoxesArray();
+                musicClient.sendMusicToServer(nameMusicTextField.getText(), backupCheckBoxes);
                 nameMusicTextField.setText("");
                 nameMusicTextField.requestFocus();
             } catch (Exception ex) {

@@ -25,6 +25,7 @@
         </constraints>
         <properties>
           <font size="14"/>
+          <text value="Tworojok"/>
         </properties>
       </component>
       <component id="f090d" class="javax.swing.JButton" binding="OKButton" default-binding="true">
