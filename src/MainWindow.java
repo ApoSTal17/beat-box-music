@@ -71,7 +71,7 @@ public class MainWindow extends JFrame {
         nameMusicTextField.setPreferredSize(new Dimension(200, 23));
         JPanel textFieldPanel = new JPanel();
 
-        if (flag) sendMessageToServer();
+        sendMessageToServer();
 
         JButton sendButton = new JButton("Send");
         sendButton.setPreferredSize(new Dimension(130, 20));
