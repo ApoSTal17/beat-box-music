@@ -30,8 +30,6 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
 
-        boolean flag = false;
-
         musicPreview = new Music();
 
         JPanel background = new JPanel(new BorderLayout());
@@ -88,8 +86,6 @@ public class MainWindow extends JFrame {
             }
         });
 
-        double count = 10.0;
-
         chatTextArea = new JTextArea();
         chatTextArea.setEditable(false);
         /*chatTextArea.addCaretListener(e -> {
@@ -120,8 +116,6 @@ public class MainWindow extends JFrame {
         getContentPane().add(background);
 
         //  check boxes
-
-        if (count > 0.5) flag = true;
 
         GridLayout grid = new GridLayout(16, 16);
         grid.setVgap(1);
