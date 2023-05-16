@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 
 public class MainWindow extends JFrame {
 
@@ -28,8 +29,6 @@ public class MainWindow extends JFrame {
     private String userName = "";
 
     public MainWindow() {
-
-        boolean flag = false;
 
         musicPreview = new Music();
 
@@ -70,7 +69,7 @@ public class MainWindow extends JFrame {
         nameMusicTextField.setPreferredSize(new Dimension(200, 23));
         JPanel textFieldPanel = new JPanel();
 
-        if (flag) sendMessageToServer();
+        sendMessageToServer();
 
         JButton sendButton = new JButton("Send");
         sendButton.setPreferredSize(new Dimension(130, 20));
@@ -86,10 +85,6 @@ public class MainWindow extends JFrame {
                 }
             }
         });
-
-        int count = flag ? 10 : 10;
-
-
 
         chatTextArea = new JTextArea();
         chatTextArea.setEditable(false);
@@ -121,8 +116,6 @@ public class MainWindow extends JFrame {
         getContentPane().add(background);
 
         //  check boxes
-
-        if (count > 0.5) flag = true;
 
         GridLayout grid = new GridLayout(16, 16);
         grid.setVgap(1);
@@ -405,6 +398,6 @@ public class MainWindow extends JFrame {
     }
 
     public static void main(String[] args) {
-        MainWindow mainWindow = new MainWindow();
+        new MainWindow();
     }
 }

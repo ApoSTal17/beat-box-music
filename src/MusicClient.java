@@ -33,12 +33,7 @@ public class MusicClient {
         receiveMusicThread = new Thread(new ReceiveMusic());
         receiveMusicThread.start();
 
-        var v1 = new String("toLowerCase");
-        var v2 = "toLowerCase";
-        v1.toLowerCase();
-        v1 = v1;
-        System.out.println(v1);
-        System.out.println(v1.equals(v2));
+
     }
 
     protected void sendMusicToServer(String nameMusic, boolean[][] backupCheckBoxes) throws Exception {
