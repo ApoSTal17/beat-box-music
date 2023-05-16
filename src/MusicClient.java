@@ -1,3 +1,6 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 import java.io.*;
 import java.net.Socket;
@@ -15,6 +18,8 @@ public class MusicClient {
 
     protected MusicClient(MainWindow mainWindow) throws Exception {
 
+
+
         socket = new Socket("localhost", 4242);
         objectWriter = new ObjectOutputStream(socket.getOutputStream());
         objectReader = new ObjectInputStream(socket.getInputStream());
@@ -27,6 +32,13 @@ public class MusicClient {
 
         receiveMusicThread = new Thread(new ReceiveMusic());
         receiveMusicThread.start();
+
+        var v1 = new String("toLowerCase");
+        var v2 = "toLowerCase";
+        v1.toLowerCase();
+        v1 = v1;
+        System.out.println(v1);
+        System.out.println(v1.equals(v2));
     }
 
     protected void sendMusicToServer(String nameMusic, boolean[][] backupCheckBoxes) throws Exception {

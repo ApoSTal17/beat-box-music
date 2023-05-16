@@ -1,3 +1,7 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -24,6 +28,8 @@ public class MainWindow extends JFrame {
     private String userName = "";
 
     public MainWindow() {
+
+        boolean flag = false;
 
         musicPreview = new Music();
 
@@ -64,6 +70,8 @@ public class MainWindow extends JFrame {
         nameMusicTextField.setPreferredSize(new Dimension(200, 23));
         JPanel textFieldPanel = new JPanel();
 
+        if (flag) sendMessageToServer();
+
         JButton sendButton = new JButton("Send");
         sendButton.setPreferredSize(new Dimension(130, 20));
 
@@ -79,12 +87,16 @@ public class MainWindow extends JFrame {
             }
         });
 
+        int count = flag ? 10 : 10;
+
+
+
         chatTextArea = new JTextArea();
         chatTextArea.setEditable(false);
         /*chatTextArea.addCaretListener(e -> {
             e.getDot()
         });*/
-        chatTextArea.getPopupLocation()
+        //chatTextArea.getPopupLocation()
         JScrollPane chatScroller = new JScrollPane(chatTextArea);
         chatTextArea.setLineWrap(true);
         chatScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -109,6 +121,8 @@ public class MainWindow extends JFrame {
         getContentPane().add(background);
 
         //  check boxes
+
+        if (count > 0.5) flag = true;
 
         GridLayout grid = new GridLayout(16, 16);
         grid.setVgap(1);
@@ -141,6 +155,8 @@ public class MainWindow extends JFrame {
         setJMenuBar(jMenuBar);
 
         JFileChooser jFileChooser = new JFileChooser("D:/JavaProjects/jaba3kurs/BeatBoxMusic");
+
+
 
         openMenuItem.addActionListener(e -> {
             jFileChooser.showOpenDialog(this);
