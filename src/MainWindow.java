@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 
 public class MainWindow extends JFrame {
 
@@ -87,9 +88,7 @@ public class MainWindow extends JFrame {
             }
         });
 
-        double count = flag ? 10.0 : 10.0;
-
-
+        double count = 10.0;
 
         chatTextArea = new JTextArea();
         chatTextArea.setEditable(false);
