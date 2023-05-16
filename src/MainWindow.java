@@ -87,7 +87,7 @@ public class MainWindow extends JFrame {
             }
         });
 
-        int count = flag ? 10 : 10;
+        double count = flag ? 10.0 : 10.0;
 
 
 
